@@ -22,7 +22,7 @@ and evidence, then proceed. "H" = handoff section, "P" = plan doc
 | C1 | H6.4 vs H6.2 | "out(x,x) change logit is spatially constant" cannot hold with `absdiff_sum` fusion (the f1+f2 term varies) nor with zero-padded convs at borders. | Assertion dropped. Tests check swap-equality (`torch.equal`) for every fusion mode and that the abs-diff half of the fused features is zero for identical inputs. Identity exactness comes from the H8 guard (`test_identity_guard`). |
 | C2 | H0.3, H5.4, H6.2, H6.4, H9, P4.1 | Tolerances disagree (bit-identical / `torch.equal` / 1e-5). | Exact equality everywhere, by canonical ordering and per-date encoder calls in eval mode. |
 | C3 | H5.4 steps 1 and 4 | Phase correlation (subpixel) and shapely union/intersection are not bitwise symmetric in floating point. | Every pairwise function sorts its inputs by a content key (sha256 of bytes / WKB), computes once, maps back. |
-| C4 | H7.4 vs definitions | "Re-run robustness and assert unchanged" after calibration cannot hold for `robust_synthetic`/`robust_near`, which depend on tau and b. | Assert swap and identity unchanged; log synthetic/near before and after. Training-time validation uses tau=0.5, b=0. |
+| C4 | H7.4 vs definitions | "Re-run robustness and assert unchanged" after calibration cannot hold for `robust_synthetic`/`robust_near`, which depend on tau and b; on the raw network `robust_identity` also depends on tau (it is the identity *guard* in the pipeline that is exact). | `calibrate` asserts `robust_swap == 1.0` before and after and logs identity/synthetic/near before and after. Training-time validation uses tau=0.5, b=0. |
 | C5 | H8 step 1 vs H5.4 | `pipeline.run(A.tif, B.tif)` and `test_identity_guard` cannot call `preprocess_pair(ScenePath, ..., AoiRow)` as written (no MTD, no AOI row, maybe no SCL). | `Scene` reader protocol (`SafeZipScene`, `SimpleScene`, `GeoTiffScene`); AOI row optional at inference; `cloud.method=scl` with no SCL means all valid. |
 | C6 | H5.4 steps 4–5 | Validity masks are not shifted with the half-shifted images. | Masks shifted nearest-neighbour; exposed strip set to 0. |
 | C7 | H6.4 | "about 45 M parameters"; the H6.3 wiring gives about 38 M. | Test asserts 30–50 M. |
@@ -41,6 +41,20 @@ and evidence, then proceed. "H" = handoff section, "P" = plan doc
 | C20 | H5.10, H4 under A3 | Pixel constants (50 px, `dilate_px`, `max_shift_px`, 128-px crop radius) change meaning at 2.5 m; `sr.pool_to_5m` must be false. | `configs/ablations/A3_2p5m.yaml` sets `pool_to_5m: false` and doubles the px constants. |
 | C21 | H12 vs P7.7/P14 | A8 means the NOCHANGE_HARD share in H12/P11 but auto-label down-weighting in P7.7/P14; A1b missing from the H12 order. | H12 governs; `A1b_sen2sr_main.yaml` follows A1. |
 | C22 | H3.1 vs H11.1/H15 | `configs/targets.csv` and `docs/DEVIATIONS.md` are referenced but absent from the layout; `models/` absent from the data layout. | All three added. |
+
+## Additions made while implementing (2026-10-19)
+
+| what | where | why |
+|---|---|---|
+| `scd/status.py` | package | `runs/pipeline_status.json` writer for the notebook STATUS cells (H10); logic must not live in the notebook. |
+| `scd/geo/vector.content_key`, `canonical_pair` | package | the canonical-ordering primitive behind every exact-symmetry guarantee (C3). |
+| `Scene` protocol with `SimpleScene`, `SafeZipScene`, `GeoTiffScene` | `scd/imagery/scenes.py` | C5; fixtures and delivered GeoTIFFs share the SAFE code path. |
+| `scd/eval/evaluate.py`, `scd/train/ablation.py` | package (stubs, M8) | targets of `scripts/13_evaluate.py` and `scripts/14_ablation.py`; H3.1 had no module for them. |
+| `tests/fixtures/{synth,labels,oracle,make_smoke_data}.py` | tests | synthetic scenes, reviewed GeoPackages, an exactly symmetric oracle network and the smoke dataset (C13, C17). |
+| `make smoke` trains one full epoch of 2 steps instead of `max_steps=2` | `configs/smoke.yaml` | Lightning runs validation and checkpoints at epoch end; a `max_steps` stop mid-epoch would skip both. |
+| `train.num_workers`, `train.max_steps`, `TrainCfg.precision` accepts `32` or `"32"` | config | smoke/debug knobs; `--set train.precision=32` parses as an int. |
+| H5.2 rule 2 | `scenes.select_pairs` | the SCL-based AOI cloud fraction exists only after download; the query filter uses the tile-level percentage and `preprocess_pair` records the per-AOI fraction in `meta.json`. |
+| `registry.target_type` accepts `unknown` | `scd/imagery/registry.py` | the 42 targets enter the registry before the Phase 0 survey assigns a type (H11.2). |
 
 ## Unverified code (written from the H2.1 API notes, not executed on this machine)
 

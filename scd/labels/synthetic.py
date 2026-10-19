@@ -130,7 +130,7 @@ def extract_objects(
         for region in measure.regionprops(lab):
             area_m2 = float(region.area) * res_m * res_m
             if cid == CLASS_IDS["road"]:
-                length_m = float(region.major_axis_length) * res_m
+                length_m = float(region.axis_major_length) * res_m
                 if not (ROAD_LENGTH_M[0] <= length_m <= ROAD_LENGTH_M[1]):
                     continue
             else:
