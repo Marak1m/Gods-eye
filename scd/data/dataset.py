@@ -41,14 +41,24 @@ class DrawRequest:
     augment: bool = True
 
 
-def near_identical(t1: np.ndarray, rng: np.random.Generator, cfg: Config) -> np.ndarray:
-    """Noise, optional 1 px shift and optional slight blur on a copy; label stays all-zero."""
+def near_identical(
+    t1: np.ndarray, rng: np.random.Generator, cfg: Config, valid: np.ndarray | None = None
+) -> np.ndarray:
+    """Noise, optional 1 px shift and optional slight blur on a copy; label stays all-zero.
+
+    With `valid`, pixels whose shifted value would come from invalid (nodata) pixels keep their
+    original value, so the perturbation never drags a nodata border into valid data.
+    """
     x = t1.astype(np.float32) / cfg.bands.scale
+    original = x.copy()
     sigma = float(rng.uniform(*cfg.augment.radiometric.noise_sigma))
     x = x + rng.normal(0.0, sigma, x.shape).astype(np.float32)
     if rng.random() < 0.5:
         dy, dx = int(rng.integers(-1, 2)), int(rng.integers(-1, 2))
-        x = np.stack([np.roll(b, (dy, dx), axis=(0, 1)) for b in x])
+        x = ndimage.shift(x, (0, dy, dx), order=0, mode="nearest")  # edge replication, no wrap-around
+        if valid is not None:
+            src_valid = ndimage.shift(valid.astype(np.uint8), (dy, dx), order=0, mode="nearest").astype(bool)
+            x = np.where(src_valid[None], x, original)
     if rng.random() < 0.5:
         x = ndimage.gaussian_filter(x, sigma=(0, 0.6, 0.6))
     x = np.clip(x, 0.0, cfg.bands.clip_max) * cfg.bands.scale
@@ -135,7 +145,7 @@ class PairChipDataset(Dataset):
             change = np.where(valid == 1, 0, IGNORE).astype(np.uint8)
             s2 = s1.copy()
         elif tt == TileType.NEAR_IDENTICAL.value:
-            t2 = near_identical(t1, rng, cfg)
+            t2 = near_identical(t1, rng, cfg, valid)
             change = np.where(valid == 1, 0, IGNORE).astype(np.uint8)
             s2 = s1.copy()
         elif tt == TileType.SYNTHETIC.value and req.synthetic_objs:

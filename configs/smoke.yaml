@@ -9,9 +9,9 @@ model: {encoder_init: random}
 train:
   precision: "32"
   batch_size: 2
-  crops_per_epoch: 8
+  crops_per_epoch: 4          # 2 steps of batch 2; one full epoch so validation + checkpoints run
   epochs: 1
   num_workers: 0
   robustness_subset: 4
-  max_steps: 2
+  max_steps: null
 infer: {window_px: 128, stride_px: 96}

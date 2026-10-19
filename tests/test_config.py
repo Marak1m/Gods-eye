@@ -82,7 +82,7 @@ def test_base_inheritance_for_every_config_file(data_root: Path) -> None:
         assert c.bands.order == BAND_ORDER, f
     smoke = load(CONFIGS / "smoke.yaml")
     assert smoke.grid.chip_px == 256 and smoke.sr.method == "bicubic" and smoke.cloud.method == "scl"
-    assert smoke.train.max_steps == 2 and smoke.train.precision == "32"
+    assert smoke.train.max_steps is None and smoke.train.precision == "32"
     assert smoke.labeling_guide_path().name == "labeling_guide_smoke.yaml"
     assert load(CONFIGS / "ablations" / "A1_bicubic.yaml").sr.method == "bicubic"
     assert load(CONFIGS / "ablations" / "A3_2p5m.yaml").grid.res_m == 2.5

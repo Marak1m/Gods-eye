@@ -24,6 +24,8 @@ from scd.model.heads import ChangeHead, ClassHead, SemanticDecoder, Softmax5Head
 
 
 class SiameseChangeNet(nn.Module):
+    return_semantic: bool
+
     def __init__(
         self,
         encoder: str = "convnext_tiny",

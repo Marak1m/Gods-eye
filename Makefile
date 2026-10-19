@@ -36,7 +36,7 @@ smoke-data:
 
 # M7 gate: smoke-data + 2 training steps + stub calibration + inference + the invariance tests
 smoke: smoke-data
-	$(SMOKE_ENV) $(PY) scripts/09_train.py $(SMOKE_CFG) --run smoke --set train.max_steps=2
+	$(SMOKE_ENV) $(PY) scripts/09_train.py $(SMOKE_CFG) --run smoke
 	$(SMOKE_ENV) $(PY) scripts/10_calibrate.py $(SMOKE_CFG) --run smoke --stub
 	$(SMOKE_ENV) $(PY) scripts/11_infer.py $(SMOKE_CFG) --run smoke \
 	  --t1 $(SMOKE_DATA)/pairs/A_smoke_01/p01/t1.tif --t2 $(SMOKE_DATA)/pairs/A_smoke_01/p01/t2.tif \
