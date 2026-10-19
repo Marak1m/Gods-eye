@@ -1,0 +1,9 @@
+# A3: 2.5 m working grid, same recipe; px constants doubled (DEVIATIONS C20)
+_base_: ../default.yaml
+grid: {res_m: 2.5, snap_m: 2.5, tile_px: 512, chip_px: 1024}
+sr: {pool_to_5m: false}
+cloud: {dilate_px: 6}
+coreg: {max_shift_px: 16}
+chips: {min_change_px: 200}
+sampler: {crop_centre_radius_px: 256}
+augment: {shift: {max_px: 4, p: 0.3}}

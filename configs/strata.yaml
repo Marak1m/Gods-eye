@@ -1,0 +1,46 @@
+# Stratum definitions (plan doc section 3). Training shares live in default.yaml `strata.shares`.
+# contrast_seasons: the two month sets used to pick NOCHANGE_HARD pairs (HANDOFF 5.2 rule 4).
+# allowed_months: restricts scene search (stratum E: dry season only, rule 5).
+strata:
+  A:
+    name: High plateau / cold desert
+    eval_share: 0.33
+    contrast_seasons: [[12, 1, 2], [7, 8, 9]]
+    allowed_months: null
+    max_pairs: 3
+    pseudo_change: [snow, lake level, braided rivers, long shadows, grassland greening]
+  B:
+    name: Hot desert / oasis / loess
+    eval_share: 0.33
+    contrast_seasons: [[1, 2, 3], [7, 8, 9]]
+    allowed_months: null
+    max_pairs: 3
+    pseudo_change: [dune migration, dust, salt-flat moisture, oasis crop cycles, ephemeral water]
+  C:
+    name: Irrigated alluvial plain
+    eval_share: 0.10
+    contrast_seasons: [[8, 9], [3, 4]]
+    allowed_months: null
+    max_pairs: 2
+    pseudo_change: [kharif/rabi phenology, monsoon flooding, river course, brick kilns, fallow]
+  D:
+    name: Temperate / subtropical mountain
+    eval_share: 0.14
+    contrast_seasons: [[6, 7, 8], [11, 12, 1]]
+    allowed_months: null
+    max_pairs: 2
+    pseudo_change: [cloud and haze, slope shadow, landslides, terraces, forest cut]
+  E:
+    name: Tropical coast
+    eval_share: 0.05
+    contrast_seasons: [[11, 12], [3, 4]]
+    allowed_months: [11, 12, 1, 2, 3, 4]
+    max_pairs: 4
+    pseudo_change: [persistent cloud, aquaculture cycles, sea state, ships, reclamation]
+  F:
+    name: Glaciated high mountain
+    eval_share: 0.05
+    contrast_seasons: [[2, 3, 4], [8, 9]]
+    allowed_months: null
+    max_pairs: 2
+    pseudo_change: [snow and ice extent, glacier surface, moraine lakes]

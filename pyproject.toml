@@ -1,0 +1,97 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ps10-scd"
+version = "0.1.0"
+description = "PS-10 Stage III semantic change detection on Sentinel-2 pairs (Siamese ConvNeXt-tiny U-Net)"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+license = { text = "Proprietary" }
+authors = [{ name = "PS-10 team", email = "ai@yuvrik.com" }]
+dependencies = [
+  # HANDOFF.md section 2.1 — pin minor versions in uv.lock at install time
+  "torch>=2.4",
+  "torchvision",
+  "lightning>=2.4",
+  "timm>=1.0",
+  "torchmetrics>=1.4",
+  "numpy",
+  "scipy",
+  "scikit-image",
+  "scikit-learn",
+  "pandas",
+  "pyarrow",
+  "rasterio>=1.4",
+  "geopandas>=1.0",
+  "shapely>=2.0",
+  "pyproj",
+  "affine",
+  "fiona",
+  "pystac-client",
+  "planetary-computer",
+  "cdsetool",
+  "sen2sr",
+  "mlstac",
+  "omnicloudmask",
+  "omegaconf",
+  "pydantic>=2",
+  "typer",
+  "rich",
+  "tqdm",
+  "jupyter",
+  "ipywidgets",
+  "papermill",
+  "matplotlib",
+  "nbformat",
+  "folium",
+  "pyyaml",
+]
+
+[project.optional-dependencies]
+coreg = ["arosics"]
+dev = ["pytest", "pytest-xdist", "ruff", "mypy", "types-PyYAML", "pandas-stubs"]
+
+[project.scripts]
+scd-infer = "scd.infer.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["scd"]
+
+[tool.uv]
+default-groups = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+  "gpu: needs a CUDA device, real data or a trained checkpoint (skipped by `make test`)",
+  "network: needs internet access or credentials (skipped by `make test`)",
+  "slow: takes more than ~30 s on CPU",
+]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = ["third_party", "notebooks", "data", "runs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "W"]
+ignore = ["B008", "B905", "E741"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/*" = ["E402"]
+"tests/*" = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+packages = ["scd"]
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_unused_ignores = false
+warn_redundant_casts = true
+no_implicit_optional = true
+disallow_incomplete_defs = true
+exclude = ["third_party", "notebooks", "data", "runs"]

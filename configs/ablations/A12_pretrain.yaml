@@ -1,0 +1,6 @@
+# A12: binary change-head pretraining on OSCD/TERRA-CD/LEVIR/S2Looking chips at 5 m
+_base_: ../default.yaml
+train:
+  pretrain:
+    ckpt: ${paths.runs}/pretrain_binary/checkpoints/last.ckpt
+    chips_dir: ${paths.data_root}/external/binary_cd_chips

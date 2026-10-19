@@ -1,0 +1,51 @@
+# Labeling guide (plan doc Appendix B). Filled from the Stage-II organiser data in Phase 0 and
+# signed off before any annotation. Every `fill` is a decision that changes what the model learns;
+# scd.labels.conventions.load() refuses to run while any `fill` remains (HANDOFF.md 5.5).
+version: 0
+status: unfilled                      # -> "signed_off:<initials>:<date>" after Phase 0
+general:
+  removals_labeled: fill              # true if class X at T1 and background at T2 is labeled change X
+  overlap_priority: [building, solar, road, buildup]
+  overlap_priority_confirmed: fill    # true once checked on Stage-II examples (building in a new compound)
+  validity_rule: ignore_255           # cloud, shadow or nodata at either date -> 255; never guess under cloud
+  construction_in_progress: fill      # buildup | building   (foundations and framing visible; roof complete = building)
+  partial_change_labeled: fill        # true | false         (object extended by less than the minimum size)
+  building_rule_applies_to: fill      # polygon | component  (how the 60 x 30 m rule is measured)
+  annotation_display_scale_m: 2.5
+  annotation_snap_m: 5.0
+classes:
+  buildup:
+    id: 1
+    definition: fill
+    include: [leveled ground, compounds, hardstanding, construction sites, reclamation, quarry and spoil areas if Stage II includes them]
+    exclude: [fallow or harvested fields, dry riverbeds, natural bare ground, dune movement]
+    min_area_m2: 2500
+    boundary_rule: outer edge of the leveled or built-up area
+    reference_examples: fill          # Stage-II chip ids
+  building:
+    id: 2
+    definition: fill
+    include: ["single roofs >= 60 x 30 m: hangars, warehouses, plants, barracks blocks"]
+    exclude: [houses, attached rows of small buildings unless Stage II merges them, tents, vehicles, ships]
+    min_area_m2: 1800
+    boundary_rule: roof outline, no shadow
+    reference_examples: fill
+  road:
+    id: 3
+    definition: fill
+    include: [paved and compacted roads, tracks visible at 5 m]
+    exclude: [field boundaries, canals, pipelines, dry channels]
+    min_length_m: 200
+    burn_width_m: {highway: 10, access: 6}
+    runways_as_roads: fill            # true | false (taxiways and runways classed as roads?)
+    reference_examples: fill
+  solar:
+    id: 4
+    definition: fill
+    include: [panel arrays]
+    exclude: [greenhouses, water bodies with glint, reflective roofs]
+    min_area_m2: 5000
+    includes_substations: fill        # true | false (fenced park including substations?)
+    boundary_rule: fill               # array outer edge | fence line
+    reference_examples: fill
+issues: []                            # cases the guide does not cover, logged by annotators

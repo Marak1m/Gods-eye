@@ -1,0 +1,9 @@
+# Conda alternative to `uv sync`; the Makefile uses uv. Keep in step with pyproject.toml.
+name: ps10-scd
+channels: [conda-forge]
+dependencies:
+  - python=3.11
+  - pip
+  - gdal>=3.8          # only needed for the optional `coreg` extra (arosics)
+  - pip:
+      - -e .[dev]

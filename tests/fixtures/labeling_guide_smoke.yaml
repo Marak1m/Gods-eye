@@ -1,0 +1,50 @@
+# Fully filled labeling guide used by tests and `make smoke` only (DEVIATIONS C13).
+# The real guide (repo root) stays `fill` until Phase 0 reads the Stage-II data.
+version: 0
+status: smoke_fixture
+general:
+  removals_labeled: true
+  overlap_priority: [building, solar, road, buildup]
+  overlap_priority_confirmed: true
+  validity_rule: ignore_255
+  construction_in_progress: buildup
+  partial_change_labeled: false
+  building_rule_applies_to: polygon
+  annotation_display_scale_m: 2.5
+  annotation_snap_m: 5.0
+classes:
+  buildup:
+    id: 1
+    definition: leveled, cleared or newly hard-surfaced ground
+    include: [leveled ground, compounds, hardstanding, construction sites, reclamation]
+    exclude: [fallow fields, dry riverbeds, natural bare ground, dune movement]
+    min_area_m2: 2500
+    boundary_rule: outer edge of the leveled or built-up area
+    reference_examples: []
+  building:
+    id: 2
+    definition: single roof at least 60 x 30 m
+    include: [hangars, warehouses, plants, barracks blocks]
+    exclude: [houses, attached rows of small buildings, tents, vehicles, ships]
+    min_area_m2: 1800
+    boundary_rule: roof outline, no shadow
+    reference_examples: []
+  road:
+    id: 3
+    definition: paved or compacted road visible at 5 m
+    include: [paved and compacted roads, tracks visible at 5 m]
+    exclude: [field boundaries, canals, pipelines, dry channels]
+    min_length_m: 200
+    burn_width_m: {highway: 10, access: 6}
+    runways_as_roads: true
+    reference_examples: []
+  solar:
+    id: 4
+    definition: photovoltaic panel array
+    include: [panel arrays]
+    exclude: [greenhouses, water bodies with glint, reflective roofs]
+    min_area_m2: 5000
+    includes_substations: false
+    boundary_rule: array outer edge
+    reference_examples: []
+issues: []

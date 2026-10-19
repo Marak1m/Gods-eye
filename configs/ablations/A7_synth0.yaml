@@ -1,0 +1,6 @@
+# A7: no synthetic tiles (delta to CHANGE_POS)
+_base_: ../default.yaml
+sampler:
+  tile_type_shares:
+    default: {CHANGE_POS: 0.63, NOCHANGE_HARD: 0.27, NOCHANGE_PLAIN: 0.05, IDENTICAL: 0.02, NEAR_IDENTICAL: 0.03, SYNTHETIC: 0.0, STAR: 0.0}
+    F:       {CHANGE_POS: 0.20, NOCHANGE_HARD: 0.70, NOCHANGE_PLAIN: 0.05, IDENTICAL: 0.02, NEAR_IDENTICAL: 0.03, SYNTHETIC: 0.0, STAR: 0.0}

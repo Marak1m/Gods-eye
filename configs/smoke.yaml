@@ -1,0 +1,17 @@
+# CPU smoke configuration (`make smoke`), DEVIATIONS C12/C13. Inherits default.yaml.
+_base_: default.yaml
+labeling_guide: tests/fixtures/labeling_guide_smoke.yaml
+grid: {tile_px: 128, chip_px: 256}
+chips: {stride_px: 192}
+sr: {method: bicubic}
+cloud: {method: scl}
+model: {encoder_init: random}
+train:
+  precision: "32"
+  batch_size: 2
+  crops_per_epoch: 8
+  epochs: 1
+  num_workers: 0
+  robustness_subset: 4
+  max_steps: 2
+infer: {window_px: 128, stride_px: 96}

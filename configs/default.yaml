@@ -1,0 +1,114 @@
+# ps10-scd master configuration (HANDOFF.md section 4). Other config files set `_base_: default.yaml`
+# and override sections. Every script takes --config <file> and --set key=value.
+paths:
+  data_root: ${oc.env:SCD_DATA}
+  runs: ${oc.env:SCD_RUNS,${oc.env:SCD_DATA}/runs}
+labeling_guide: labeling_guide.yaml
+grid:
+  res_m: 5.0
+  snap_m: 5.0
+  tile_px: 512
+  chip_px: 1024
+bands:
+  order: [B02, B03, B04, B08, B11, B12]
+  scale: 10000.0
+  clip_max: 1.2
+  normalise: fixed             # | percentile | irmad_sym   (ablation A2)
+sr:
+  method: sen2sr_lite_rgbn     # | bicubic | sen2sr_lite_main
+  model_dir: ${paths.data_root}/models/SEN2SRLite_RGBN_x4
+  model_dir_main: ${paths.data_root}/models/SEN2SRLite_main
+  pool_to_5m: true
+cloud:
+  method: omnicloudmask        # | scl
+  dilate_px: 3
+coreg:
+  method: phase_corr_half      # | arosics_local_half | none
+  max_shift_px: 8
+classes:
+  ids: {none: 0, buildup: 1, building: 2, road: 3, solar: 4}
+  rubric_weights: {buildup: 0.40, building: 0.30, road: 0.20, solar: 0.10}
+  priority: [building, solar, road, buildup]      # first wins on overlap
+  min_area_m2: {building: 1800, solar: 5000, buildup: 2500}
+  min_length_m: {road: 200}
+  road_width_m: {highway: 10, access: 6}
+strata:
+  shares: {A: 0.30, B: 0.30, C: 0.12, D: 0.12, E: 0.08, F: 0.08}
+chips:
+  stride_px: 768
+  min_valid_fraction: 0.5
+  min_change_px: 50            # >= 50 change px of one class (1,250 m2 at 5 m) => CHANGE_POS
+sampler:
+  tile_type_shares:
+    default: {CHANGE_POS: 0.45, NOCHANGE_HARD: 0.27, NOCHANGE_PLAIN: 0.05,
+              IDENTICAL: 0.02, NEAR_IDENTICAL: 0.03, SYNTHETIC: 0.18, STAR: 0.0}
+    F:       {CHANGE_POS: 0.10, NOCHANGE_HARD: 0.70, NOCHANGE_PLAIN: 0.05,
+              IDENTICAL: 0.02, NEAR_IDENTICAL: 0.03, SYNTHETIC: 0.10, STAR: 0.0}
+  class_shares: {buildup: 0.35, building: 0.30, road: 0.20, solar: 0.15}
+  density_exponent: 0.3
+  change_centred_prob: 0.7
+  crop_centre_radius_px: 128
+  auto_label_weight: 0.5
+model:
+  encoder: convnext_tiny
+  encoder_init: imagenet       # | v3_roads | dinov3_convnext_tiny | random (tests only)
+  in_channels: 6
+  decoder_channels: [256, 128, 64, 32]
+  fusion: absdiff_sum          # | absdiff | absdiff_prod
+  full_res_skip: true
+  aux_semantic: true
+  head_mode: factorized        # | softmax5   (ablation A5)
+  n_change_classes: 4
+  n_sem_classes: 5
+train:
+  epochs: 100
+  batch_size: 16
+  crops_per_epoch: 15000
+  num_workers: 8
+  lr_decoder: 3.0e-4
+  lr_encoder: 1.0e-4
+  lr_min: 1.0e-6
+  weight_decay: 1.0e-4
+  warmup_epochs: 3
+  precision: 16-mixed
+  ema_decay: 0.999
+  loss: {pos_weight: 2.0, lambda_sem: 0.3, class_weight_power: 0.5, cldice_road: false}
+  checkpoint: {save_top_k: 5, milestone_every: 10, monitor: val/leaderboard_proxy}
+  early_stop_patience: 20
+  robustness_subset: 64        # val chips used for the simulated cases each epoch
+  seed: 42
+  max_steps: null              # smoke/debug only
+  pretrain: {ckpt: null, chips_dir: null}   # ablation A12
+augment:
+  geometric: {d4: 1.0, rotate_deg: 30, rotate_p: 0.5, scale: [0.9, 1.1], scale_p: 0.3}
+  temporal_swap_p: 0.5
+  radiometric: {brightness: 0.12, contrast: 0.12, gamma: [0.85, 1.15], band_gain: 0.05,
+                haze_p: 0.3, noise_sigma: [0.005, 0.02]}
+  shift: {max_px: 2, p: 0.3}
+  cloud_paste_p: 0.15
+  band_dropout_p: 0.05
+infer:
+  window_px: 512
+  stride_px: 384
+  tta_geometric: 8
+  tta_temporal: false          # DEVIATIONS U2: exact symmetry makes the second order redundant
+  identity_eps: 1.0e-6
+  nodata_value: 255
+  invalid_value: 0             # DEVIATIONS U3: 0 | 255 written for invalid pixels
+  simplify_m: 2.5
+  water_ndwi: 0.3
+  postprocess:
+    min_area_m2: {building: 1800, solar: 5000, buildup: 2500}
+    min_length_m: {road: 150}
+    hole_fill_m2: {building: 200, buildup: 500}
+    solar_close_px: 3
+finetune:                      # M9, plan doc section 12
+  base_run: null
+  epochs: 20
+  lr_decoder: 3.0e-5
+  lr_encoder: 1.0e-5
+  freeze_encoder_stages: [1, 2]
+  freeze_epochs: 5
+  mix_base: 0.5
+  select_weights: {targets: 0.6, strata: 0.4}
+  forgetting_tolerance: 0.02

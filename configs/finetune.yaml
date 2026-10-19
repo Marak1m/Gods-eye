@@ -1,0 +1,16 @@
+# Stage-III fine-tune (M9, plan doc section 12). Inherits default.yaml; set finetune.base_run.
+_base_: default.yaml
+finetune:
+  base_run: v1_seed42
+  epochs: 20
+  lr_decoder: 3.0e-5
+  lr_encoder: 1.0e-5
+  freeze_encoder_stages: [1, 2]
+  freeze_epochs: 5
+  mix_base: 0.5
+  select_weights: {targets: 0.6, strata: 0.4}
+  forgetting_tolerance: 0.02
+train:
+  epochs: 20
+  warmup_epochs: 0
+  early_stop_patience: 10

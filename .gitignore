@@ -1,0 +1,30 @@
+# data and runs are never committed (HANDOFF.md section 0.5)
+/data
+/runs/
+/outputs/
+*.ckpt
+*.pt
+*.pth
+
+# environments and caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+build/
+dist/
+
+# notebooks
+.ipynb_checkpoints/
+notebooks/qc/*
+!notebooks/qc/.gitkeep
+notebooks/*.out.ipynb
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

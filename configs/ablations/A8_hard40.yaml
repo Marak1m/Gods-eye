@@ -1,0 +1,5 @@
+# A8: NOCHANGE_HARD share 0.40
+_base_: ../default.yaml
+sampler:
+  tile_type_shares:
+    default: {CHANGE_POS: 0.32, NOCHANGE_HARD: 0.40, NOCHANGE_PLAIN: 0.05, IDENTICAL: 0.02, NEAR_IDENTICAL: 0.03, SYNTHETIC: 0.18, STAR: 0.0}
